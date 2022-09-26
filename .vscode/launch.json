@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "name": "Run with LÖVE",
+      "type": "f5anything",
+      "request": "launch",
+      "command": "love ${workspaceFolder}",
+      "terminalName": "LÖVE",
+    }
+  ],
+  "version": "0.2.0"
+}
