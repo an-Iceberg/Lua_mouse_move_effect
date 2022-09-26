@@ -44,7 +44,7 @@ function love.mousemoved(x, y, delta_x, delta_y)
   delta_mouse_y = delta_y
 
   -- TODO: add a movement vector calculated from the difference between the position and the delta position and do something cool with it
-  table.insert(mouse_trail, 1, {x = x, y = y, radius = 0})
+  table.insert(mouse_trail, 1, {x = x, y = y, radius = 20})
 end
 
 function love.wheelmoved(x, y)
@@ -55,9 +55,9 @@ function love.update(delta_time)
   love.keyboard.keysPressed = {}
 
   for index, ball in ipairs(mouse_trail) do
-    ball.radius = ball.radius + (delta_time * 20)
+    ball.radius = ball.radius - (delta_time * 20)
 
-    if ball.radius >= 20 then
+    if ball.radius <= 0 then
       table.remove(mouse_trail, index)
     end
   end
@@ -68,8 +68,10 @@ function love.draw()
   love.graphics.clear(0, 0, 0)
 
   for _, ball in pairs(mouse_trail) do
-    love.graphics.setColor(0, 1, 0)
-    love.graphics.circle("line", ball.x, ball.y, ball.radius)
+    if ball.radius > 0 then
+      love.graphics.setColor(0, 1, 0)
+      love.graphics.circle("fill", ball.x, ball.y, ball.radius)
+    end
   end
 
   love.graphics.setColor(1, 1, 1)
