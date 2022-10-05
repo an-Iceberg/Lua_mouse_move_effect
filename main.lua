@@ -2,6 +2,7 @@ math.randomseed(os.time())
 
 local utils = require("utils.utils")
 local gui = require("gui.gui")
+local mouse_trail = require("utils.mouse-trail")
 
 Sample_text = nil
 
@@ -10,7 +11,6 @@ local sample_font
 local version_number
 local delta_mouse_x
 local delta_mouse_y
-local mouse_trail = {}
 
 -- Init
 function love.load()
@@ -23,6 +23,7 @@ function love.load()
   local major, minor, revision = love.getVersion()
   version_number = love.graphics.newText(sample_font, major.."."..minor.."."..revision)
 
+  -- The mouse delta movement from one frame to the next
   delta_mouse_x = 0
   delta_mouse_y = 0
 end
@@ -37,42 +38,32 @@ end
 
 -- Mouse input
 function love.mousepressed(x, y, button)
+  mouse_trail:add(x, y)
 end
 
 function love.mousemoved(x, y, delta_x, delta_y)
   delta_mouse_x = delta_x
   delta_mouse_y = delta_y
 
-  -- TODO: add a movement vector calculated from the difference between the position and the delta position and do something cool with it
-  table.insert(mouse_trail, 1, {x = x, y = y, radius = 20})
+  mouse_trail:add(x, y)
 end
 
 function love.wheelmoved(x, y)
+  mouse_trail:modify_amount(y)
 end
 
 -- Update game state
 function love.update(delta_time)
   love.keyboard.keysPressed = {}
 
-  for index, ball in ipairs(mouse_trail) do
-    ball.radius = ball.radius - (delta_time * 20)
-
-    if ball.radius <= 0 then
-      table.remove(mouse_trail, index)
-    end
-  end
+  mouse_trail:update(delta_time)
 end
 
 -- Draw game to screen
 function love.draw()
   love.graphics.clear(0, 0, 0)
 
-  for _, ball in pairs(mouse_trail) do
-    if ball.radius > 0 then
-      love.graphics.setColor(0, 1, 0)
-      love.graphics.circle("fill", ball.x, ball.y, ball.radius)
-    end
-  end
+  mouse_trail:draw()
 
   love.graphics.setColor(1, 1, 1)
   love.graphics.draw(sample_sprite, love.graphics.getWidth() - (sample_sprite:getWidth() * 0.1), 0, 0, 0.1, 0.1)
@@ -86,7 +77,7 @@ function love.draw()
   love.graphics.draw(version_number, love.graphics.getWidth() - (version_number:getWidth() + 4), love.graphics.getHeight() - version_number:getHeight())
 
   love.graphics.setColor(1, 1, 1)
-  love.graphics.print("Length of mouse trail: "..#mouse_trail, 0, love.graphics.getHeight() - 30)
+  love.graphics.print("Amount of particles on screen"..#mouse_trail.particles.."\nAdd: "..mouse_trail.amount, 0, love.graphics.getHeight() - 60)
 end
 
 function love.quit()
